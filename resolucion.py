@@ -3,7 +3,7 @@ import math
 # ------------------ FUNCTIONS ------------------
 
 def calculate_distances(Xi, Yi, Xj, Yj):
-    return math.sqrt((Xi-Xj)^2+(Yi-Yj)^2)
+    return math.sqrt(((Xi - Xj) ** 2) + ((Yi - Yj) ** 2))
 
 # ------------------ CLASSES ------------------
 
@@ -17,7 +17,7 @@ class Node:
 
     def addEdge(self, node):
         self.edges[node.name] = node
-        self.weight = calculate_distances(coordinates[0], node.coordinates[0], coordinates[1], node.coordinates[1])
+        self.weight = calculate_distances(self.coordinates[0], node.coordinates[0], self.coordinates[1], node.coordinates[1])
 
 
 class MinHeap:
@@ -146,6 +146,8 @@ for i in range(1, dimension + 1):
         if i == j:
             continue
         officeNodes[i].addEdge(officeNodes[j])
+
+print(officeNodes[1].edges[2].weight)
 
 # for i in range(1, dimension + 1):
 #     print("The Min val is " + str(heap.remove().weight))
