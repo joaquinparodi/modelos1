@@ -137,15 +137,23 @@ for i in range(1, dimension + 1):
     officeNodes[i] = Node(i, demands[i], coordinates[i])
     officeNodes[i].weight = i
 
-heap = MinHeap(dimension)
-for i in range(1, dimension + 1):
-    heap.insert(officeNodes[i])
-
 for i in range(1, dimension + 1):
     for j in range(1, dimension + 1):
         if i == j:
             continue
         officeNodes[i].addEdge(Node(officeNodes[j].name, officeNodes[j].amount, officeNodes[j].coordinates))
+
+
+for i in range(1, dimension + 1):
+    heap = MinHeap(dimension)
+    currentOffice = officeNodes[i]
+    for j in currentOffice.edges:
+        if j != currentOffice.name:
+            heap.insert(currentOffice.edges[j])
+    minDistance = 100000000
+    currentAmount = 0
+    #for k in range(1, dimension):
+        
 
 # for i in range(1, dimension + 1):
 #     print("The Min val is " + str(heap.remove().weight))
