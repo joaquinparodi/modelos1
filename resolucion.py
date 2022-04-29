@@ -1,16 +1,24 @@
 import math
 
+# ------------------ FUNCTIONS ------------------
+
+def calculate_distances(Xi, Yi, Xj, Yj):
+    return math.sqrt((Xi-Xj)^2+(Yi-Yj)^2)
+
 # ------------------ CLASSES ------------------
 
 class Node:
-    def __init__(self, name, amount, weight):
+    def __init__(self, name, amount, coordinates):
         self.name = name
         self.amount = amount
         self.edges = {}
-        self.weight = weight
+        self.weight = 0
+        self.coordinates = coordinates
 
-    def add_edge(self, node):
+    def addEdge(self, node):
         self.edges[node.name] = node
+        self.weight = calculate_distances(coordinates[0], node.coordinates[0], coordinates[1], node.coordinates[1])
+
 
 class MinHeap:
  
@@ -100,11 +108,6 @@ class MinHeap:
         self.minHeapify(self.FRONT)
         return popped
 
-# ------------------ FUNCTIONS ------------------
-
-def calculate_distances(Xi, Yi, Xj, Yj):
-    return math.sqrt((Xi-Xj)^2+(Yi-Yj)^2)
-
 # ------------------ MAIN ------------------
 
 capacity = 0
@@ -112,6 +115,7 @@ dimension = 0
 isCoordinates = False
 coordinates = {}
 demands = {}
+officeNodes = {}
 
 file = open("problema_uno.txt", 'r')
 for line in file.readlines():
@@ -129,24 +133,19 @@ for line in file.readlines():
     else:
         demands[int(splited[0])] = int(splited[1])
 
+for i in range(1, dimension + 1):
+    officeNodes[i] = Node(i, demands[i], coordinates[i])
+    officeNodes[i].weight = i
 
+heap = MinHeap(dimension)
+for i in range(1, dimension + 1):
+    heap.insert(officeNodes[i])
 
+for i in range(1, dimension + 1):
+    for j in range(1, dimension + 1):
+        if i == j:
+            continue
+        officeNodes[i].addEdge(officeNodes[j])
 
-
-# minHeap = MinHeap(150)
-# node = Node(10, 1, 0)
-# n = 5
-
-# node.add_edge(Node(1, 5, 0.67))
-# node.add_edge(Node(2, 5, 0.47))
-# node.add_edge(Node(3, 5, 2.67))
-
-# for i in node.edges:
-#     minHeap.insert(node.edges[i])
-
-# minHeap.minHeap()
-# print("The Min val is " + str(minHeap.remove().weight))
-# print("The Min val is " + str(minHeap.remove().weight))
-# print("The Min val is " + str(minHeap.remove().weight))
-# print("The Min val is " + str(minHeap.remove().weight))
-# print("The Min val is " + str(minHeap.remove().weight))
+# for i in range(1, dimension + 1):
+#     print("The Min val is " + str(heap.remove().weight))
