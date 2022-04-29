@@ -1,6 +1,6 @@
 import math
 
-# ------------------ CLASES ------------------
+# ------------------ CLASSES ------------------
 
 class Node:
     def __init__(self, name, amount, weight):
@@ -83,13 +83,6 @@ class MinHeap:
             self.swap(current, self.parent(current))
             current = self.parent(current)
  
-    # Function to print the contents of the heap
-    def Print(self):
-        for i in range(1, (self.size//2)+1):
-            print(" PARENT : "+ str(self.Heap[i].weight)+" LEFT CHILD : "+
-                                str(self.Heap[2 * i].weight)+" RIGHT CHILD : "+
-                                str(self.Heap[2 * i + 1].weight))
- 
     # Function to build the min heap using
     # the minHeapify function
     def minHeap(self):
@@ -107,29 +100,53 @@ class MinHeap:
         self.minHeapify(self.FRONT)
         return popped
 
-# ------------------ MAIN ------------------
+# ------------------ FUNCTIONS ------------------
 
-
-def distancia_entre_sucursales(Xi, Yi, Xj, Yj):
+def calculate_distances(Xi, Yi, Xj, Yj):
     return math.sqrt((Xi-Xj)^2+(Yi-Yj)^2)
 
-minHeap = MinHeap(150)
-node = Node(10, 1, 0)
-n = 5
+# ------------------ MAIN ------------------
 
-i = 140
-while i > 1:
-    node.add_edge(Node(i, 5, i))
-    i = i - 1
+capacity = 0
+dimension = 0
+isCoordinates = False
+coordinates = {}
+demands = {}
 
-for i in node.edges:
-    minHeap.insert(node.edges[i])
+file = open("problema_uno.txt", 'r')
+for line in file.readlines():
+    splited = line.split(" ")
+    if splited[0] == "CAPACIDAD:":
+        capacity = int(splited[1])
+    elif splited[0] == "DIMENSION:":
+        dimension = int(splited[1])
+    elif splited[0] == "FIN":
+        isCoordinates = True
+    elif len(splited) == 1 or splited[0] == "EDGE_WEIGHT_TYPE:":
+        continue
+    elif isCoordinates == True:
+        coordinates[int(splited[0])] = (float(splited[1]), float(splited[2]))
+    else:
+        demands[int(splited[0])] = int(splited[1])
 
-minHeap.minHeap()
-print("The Min val is " + str(minHeap.remove().weight))
-print("The Min val is " + str(minHeap.remove().weight))
-print("The Min val is " + str(minHeap.remove().weight))
-print("The Min val is " + str(minHeap.remove().weight))
-print("The Min val is " + str(minHeap.remove().weight))
-print("The Min val is " + str(minHeap.remove().weight))
-print("The Min val is " + str(minHeap.remove().weight))
+
+
+
+
+# minHeap = MinHeap(150)
+# node = Node(10, 1, 0)
+# n = 5
+
+# node.add_edge(Node(1, 5, 0.67))
+# node.add_edge(Node(2, 5, 0.47))
+# node.add_edge(Node(3, 5, 2.67))
+
+# for i in node.edges:
+#     minHeap.insert(node.edges[i])
+
+# minHeap.minHeap()
+# print("The Min val is " + str(minHeap.remove().weight))
+# print("The Min val is " + str(minHeap.remove().weight))
+# print("The Min val is " + str(minHeap.remove().weight))
+# print("The Min val is " + str(minHeap.remove().weight))
+# print("The Min val is " + str(minHeap.remove().weight))
