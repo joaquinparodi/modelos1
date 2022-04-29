@@ -101,7 +101,8 @@ class MinHeap:
     # Function to remove and return the minimum
     # element from the heap
     def remove(self):
- 
+        if self.size == 0:
+            return False
         popped = self.Heap[self.FRONT]
         self.Heap[self.FRONT] = self.Heap[self.size]
         self.size-= 1
@@ -116,6 +117,7 @@ isCoordinates = False
 coordinates = {}
 demands = {}
 officeNodes = {}
+results = {}
 
 file = open("problema_uno.txt", 'r')
 for line in file.readlines():
@@ -143,6 +145,8 @@ for i in range(1, dimension + 1):
             continue
         officeNodes[i].addEdge(Node(officeNodes[j].name, officeNodes[j].amount, officeNodes[j].coordinates))
 
+for i in range(1, dimension + 1):
+    results[i] = []
 
 for i in range(1, dimension + 1):
     heap = MinHeap(dimension)
@@ -150,10 +154,25 @@ for i in range(1, dimension + 1):
     for j in currentOffice.edges:
         if j != currentOffice.name:
             heap.insert(currentOffice.edges[j])
-    minDistance = 100000000
     currentAmount = 0
-    #for k in range(1, dimension):
-        
+    for k in range(1, dimension + 1):
+        canContinueToNextEdge = False
+        remainEdges = []
+        while canContinueToNextEdge == False:
+            currentEdge = heap.remove()
+            if currentEdge == False:
+                canContinueToNextEdge = True
+            elif currentAmount + currentEdge.amount >= 0 and currentAmount + currentEdge.amount <= capacity:
+                currentAmount += currentEdge.amount
+                results[k].append(currentEdge.name)
+                canContinueToNextEdge = True
+            else:
+                remainEdges.append(currentEdge)
+        if len(remainEdges) > 0:
+            for l in remainEdges:
+                heap.insert(l)
+
+print(results[1])
 
 # for i in range(1, dimension + 1):
 #     print("The Min val is " + str(heap.remove().weight))
