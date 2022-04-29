@@ -17,7 +17,7 @@ class Node:
 
     def addEdge(self, node):
         self.edges[node.name] = node
-        self.weight = calculate_distances(self.coordinates[0], node.coordinates[0], self.coordinates[1], node.coordinates[1])
+        self.edges[node.name].weight = calculate_distances(self.coordinates[0], node.coordinates[0], self.coordinates[1], node.coordinates[1])
 
 
 class MinHeap:
@@ -145,9 +145,7 @@ for i in range(1, dimension + 1):
     for j in range(1, dimension + 1):
         if i == j:
             continue
-        officeNodes[i].addEdge(officeNodes[j])
-
-print(officeNodes[1].edges[2].weight)
+        officeNodes[i].addEdge(Node(officeNodes[j].name, officeNodes[j].amount, officeNodes[j].coordinates))
 
 # for i in range(1, dimension + 1):
 #     print("The Min val is " + str(heap.remove().weight))
