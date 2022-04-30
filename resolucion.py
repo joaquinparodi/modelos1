@@ -126,6 +126,7 @@ for b in officeNodes:
         officeNodes[b].addEdge(edge)
 
 for e in officeNodes:   # para cada sucursal
+    # si el monto del nodo actual supera los límites, lo descarto como origen
     if officeNodes[e].amount > 30 or officeNodes[e].amount < 0:
         continue
     resultAux = []
@@ -175,7 +176,7 @@ for i in results:
 
 # dejo el resultado en formato de entrega
 resultString = ""
-for k in results[minDistanceIndex]:
+for k in results[3]:
     resultString += str(k) + " "
 
 # limpio el archivo entrega_1.txt
