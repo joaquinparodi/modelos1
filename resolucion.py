@@ -126,6 +126,8 @@ for b in officeNodes:
         officeNodes[b].addEdge(edge)
 
 for e in officeNodes:   # para cada sucursal
+    if officeNodes[e].amount > 30 or officeNodes[e].amount < 0:
+        continue
     resultAux = []
     hasValidPath = True
     heap = MinHeap(dimension)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
@@ -173,9 +175,8 @@ for i in results:
 
 # dejo el resultado en formato de entrega
 resultString = ""
-resultString += str(minDistanceIndex)
 for k in results[minDistanceIndex]:
-    resultString += " " + str(k)
+    resultString += str(k) + " "
 
 # limpio el archivo entrega_1.txt
 open('entrega_1.txt', 'w').close()
