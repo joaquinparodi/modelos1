@@ -1,4 +1,5 @@
 import math
+from unittest import result
 
 # ------------------ FUNCTIONS ------------------
 
@@ -114,31 +115,31 @@ for line in file.readlines():
         demands[int(splited[0])] = int(splited[1])
 
 # creo los nodos (sucursales)
-for i in range(1, dimension + 1):
-    office = Node(i, demands[i], coordinates[i])
-    officeNodes[i] = office
+for a in range(1, dimension + 1):
+    office = Node(a, demands[a], coordinates[a])
+    officeNodes[a] = office
 
 # agrego para cada sucursal como aristas el resto de las sucursales
-for i in range(1, dimension + 1):
-    for j in range(1, dimension + 1):
-        if i == j:  # verifica que no sea la misma sucursal para no agregarsela como arista
+for b in range(1, dimension + 1):
+    for c in range(1, dimension + 1):
+        if b == c:  # verifica que no sea la misma sucursal para no agregarsela como arista
             continue
-        edge = Node(officeNodes[j].name, officeNodes[j].amount, officeNodes[j].coordinates)
-        officeNodes[i].addEdge(edge)
+        edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
+        officeNodes[b].addEdge(edge)
 
 # creo una lista para cada posición de sucursal (tomando esta como inicio) para luego insertar el resultado de visitas
-for i in range(1, dimension + 1):
-    results[i] = []
+for d in range(1, dimension + 1):
+    results[d] = []
 
-for i in range(1, dimension + 1):   # para cada sucursal
+for e in range(1, dimension + 1):   # para cada sucursal
     heap = MinHeap(dimension)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
-    currentOffice = officeNodes[i]
-    for j in currentOffice.edges:   # para cada arista de la sucursal actual
-        if j != currentOffice.name:
-            heap.insert(currentOffice.edges[j]) # inserto la arista en el heap
+    officeNodes[e]
+    for f in officeNodes[e].edges:   # para cada arista de la sucursal actual
+        if f != officeNodes[e].name:
+            heap.insert(officeNodes[e].edges[f]) # inserto la arista en el heap
     currentAmount = 0   # indica la cantidad de dinero transportándose
     heapIsEmpty = False
-    for k in range(1, dimension + 1): # para cada arista de la sucursal actual
+    for g in range(1, dimension + 1): # para cada arista de la sucursal actual
         edgeCanBeVisited = False # indica si se puede visitar la sucursal (si esta no supera los límites de transporte de dinero)
         remainEdges = []    # lista con las sucursales que superan los límites de dinero para luego volver a insertarlos en el heap
         while edgeCanBeVisited == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
@@ -148,14 +149,37 @@ for i in range(1, dimension + 1):   # para cada sucursal
                 heapIsEmpty = True
             elif currentAmount + currentEdge.amount >= 0 and currentAmount + currentEdge.amount <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
                 currentAmount += currentEdge.amount # sumo el monto de la sucursal visitada
-                results[i].append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
+                results[e].append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
                 edgeCanBeVisited = True    # salgo del bucle
             else:
                 remainEdges.append(currentEdge) # si el monto de la sucursal supera los límites la agrego a la lista de aristas pendientes para volver a agregar al heap
         if len(remainEdges) > 0:    # si la lista de aristas que superaron los límites no está vacía
-            for l in remainEdges:
+            for h in remainEdges:
                 if heapIsEmpty == False:    # si el heap todavía contiene sucursales
-                    heap.insert(l)  # inserto las sucursales que pasaron los límites de neuvo en el heap
+                    heap.insert(h)  # inserto las sucursales que pasaron los límites de neuvo en el heap
                 else:   # si el heap no contiene más sucursales que cumplan los límites de monto de dinero a transportar
-                    results[i].append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
+                    results[e].append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
                     break   # salgo del for k porque no hay más aristas a visitar que cumplan con los límites de dinero a transportar
+
+# obtengo el índice (nombre de sucusal origen) que tenga menor distancia recorrida
+minDistance = 1000000
+minDistanceIndex = 1
+for i in results:
+    currentDistance = 0
+    for j in officeNodes[i].edges:
+        currentDistance += officeNodes[i].edges[j].weight
+    if currentDistance < minDistance:
+        minDistance = currentDistance
+        minDistanceIndex = i
+
+# dejo el resultado en formato de entrega
+resultString = ""
+resultString += str(minDistanceIndex)
+for k in results[minDistanceIndex]:
+    resultString += " " + str(k)
+
+# limpio el archivo entrega_1.txt
+open('entrega_1.txt', 'w').close()
+# escribo el archivo entrega_1.txt
+with open('entrega_1.txt', 'a') as f:
+    f.write(resultString)
