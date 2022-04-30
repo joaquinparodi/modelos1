@@ -2,26 +2,29 @@ import math
 
 # ------------------ FUNCTIONS ------------------
 
+# calcula la distancia entre sucursales pasándole como parámetros las coordenadas de ambas
 def calculate_distances(Xi, Yi, Xj, Yj):
     return math.sqrt(((Xi - Xj) ** 2) + ((Yi - Yj) ** 2))
 
 # ------------------ CLASSES ------------------
 
+# clase nodo sucursal
 class Node:
+
     def __init__(self, name, amount, coordinates):
         self.name = name
         self.amount = amount
         self.edges = {}
-        self.weight = 0
+        self.weight = 0 # peso (distancia entre esta sucursal con otra)
         self.coordinates = coordinates
 
     def addEdge(self, node):
         self.edges[node.name] = node
         self.edges[node.name].weight = calculate_distances(self.coordinates[0], node.coordinates[0], self.coordinates[1], node.coordinates[1])
 
-
+# clase min heap: cola de prioridad por menor valor de peso de nodo de sucursal
 class MinHeap:
- 
+
     def __init__(self, maxsize):
         self.maxsize = maxsize
         self.size = 0
@@ -30,55 +33,32 @@ class MinHeap:
             self.Heap[i] = Node(-1, 0, -1)
         self.FRONT = 1
  
-    # Function to return the position of
-    # parent for the node currently
-    # at pos
     def parent(self, pos):
         return pos//2
  
-    # Function to return the position of
-    # the left child for the node currently
-    # at pos
     def leftChild(self, pos):
         return 2 * pos
  
-    # Function to return the position of
-    # the right child for the node currently
-    # at pos
     def rightChild(self, pos):
         return (2 * pos) + 1
  
-    # Function that returns true if the passed
-    # node is a leaf node
     def isLeaf(self, pos):
         return pos*2 > self.size
  
-    # Function to swap two nodes of the heap
     def swap(self, fpos, spos):
         self.Heap[fpos], self.Heap[spos] = self.Heap[spos], self.Heap[fpos]
  
-    # Function to heapify the node at pos
     def minHeapify(self, pos):
- 
-        # If the node is a non-leaf node and greater
-        # than any of its child
         if not self.isLeaf(pos):
             if (self.Heap[pos].weight > self.Heap[self.leftChild(pos)].weight or
                self.Heap[pos].weight > self.Heap[self.rightChild(pos)].weight):
- 
-                # Swap with the left child and heapify
-                # the left child
                 if self.Heap[self.leftChild(pos)].weight < self.Heap[self.rightChild(pos)].weight:
                     self.swap(pos, self.leftChild(pos))
                     self.minHeapify(self.leftChild(pos))
- 
-                # Swap with the right child and heapify
-                # the right child
                 else:
                     self.swap(pos, self.rightChild(pos))
                     self.minHeapify(self.rightChild(pos))
  
-    # Function to insert a node into the heap
     def insert(self, element):
         if self.size >= self.maxsize :
             return
@@ -91,15 +71,11 @@ class MinHeap:
             self.swap(current, self.parent(current))
             current = self.parent(current)
  
-    # Function to build the min heap using
-    # the minHeapify function
     def minHeap(self):
  
         for pos in range(self.size//2, 0, -1):
             self.minHeapify(pos)
  
-    # Function to remove and return the minimum
-    # element from the heap
     def remove(self):
         if self.size == 0:
             return False
@@ -111,14 +87,15 @@ class MinHeap:
 
 # ------------------ MAIN ------------------
 
-capacity = 0
-dimension = 0
-isCoordinates = False
-coordinates = {}
-demands = {}
-officeNodes = {}
-results = {}
+capacity = 0            # máxima capacidad de transporte de dinero
+dimension = 0           # cantidad de sucursales
+isCoordinates = False   # booleano para identificar coordenadas de cantidad de dinero de cada sucursal
+coordinates = {}        # diccionario clave nombre sucursal, valor tupla con coordenadas
+demands = {}            # diccionario clave nombre sucursal, valor cantidad de dinero
+officeNodes = {}        # diccionario clave nombre sucursal, valor nodo sucursal
+results = {}            # diccionario clave nombre sucursal, valor lista con nombres sucursales ordendos por menor distancia a la sucursal
 
+# abro el problema y lo parseo
 file = open("problema_uno.txt", 'r')
 for line in file.readlines():
     splited = line.split(" ")
@@ -135,44 +112,49 @@ for line in file.readlines():
     else:
         demands[int(splited[0])] = int(splited[1])
 
+# creo los nodos (sucursales)
 for i in range(1, dimension + 1):
     officeNodes[i] = Node(i, demands[i], coordinates[i])
-    officeNodes[i].weight = i
 
+# agrego para cada sucursal como aristas el resto de las sucursales
 for i in range(1, dimension + 1):
     for j in range(1, dimension + 1):
-        if i == j:
+        if i == j:  # verifica que no sea la misma sucursal para no agregarsela como arista
             continue
         officeNodes[i].addEdge(Node(officeNodes[j].name, officeNodes[j].amount, officeNodes[j].coordinates))
 
+# creo una lista para cada posición de sucursal (tomando esta como inicio) para luego insertar el resultado de visitas
 for i in range(1, dimension + 1):
     results[i] = []
 
-for i in range(1, dimension + 1):
-    heap = MinHeap(dimension)
+for i in range(1, dimension + 1):   # para cada sucursal
+    heap = MinHeap(dimension)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
     currentOffice = officeNodes[i]
-    for j in currentOffice.edges:
+    for j in currentOffice.edges:   # para cada arista de la sucursal actual
         if j != currentOffice.name:
-            heap.insert(currentOffice.edges[j])
-    currentAmount = 0
-    for k in range(1, dimension + 1):
-        canContinueToNextEdge = False
-        remainEdges = []
-        while canContinueToNextEdge == False:
-            currentEdge = heap.remove()
-            if currentEdge == False:
+            heap.insert(currentOffice.edges[j]) # inserto la arista en el heap
+    currentAmount = 0   # indica la cantidad de dinero transportándose
+    heapIsEmpty = False
+    for k in range(1, dimension + 1): # para cada arista de la sucursal actual
+        canContinueToNextEdge = False # indica que se puede visitar la sucursal (esta no supera los límites de transporte de dinero)
+        remainEdges = []    # lista con las sucursales que superan los límites de dinero para luego volver a insertarlos en el heap
+        while canContinueToNextEdge == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
+            currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
+            if currentEdge == False:    # si el heap está vacío, salgo del bucle
                 canContinueToNextEdge = True
-            elif currentAmount + currentEdge.amount >= 0 and currentAmount + currentEdge.amount <= capacity:
-                currentAmount += currentEdge.amount
-                results[k].append(currentEdge.name)
-                canContinueToNextEdge = True
+                heapIsEmpty = True
+            elif currentAmount + currentEdge.amount >= 0 and currentAmount + currentEdge.amount <= capacity:    # si el monto de la sucursal a visitar no supera los límites
+                currentAmount += currentEdge.amount # sumo el monto de la sucursal visitada
+                results[k].append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
+                canContinueToNextEdge = True    # salgo del bucle
             else:
-                remainEdges.append(currentEdge)
-        if len(remainEdges) > 0:
+                remainEdges.append(currentEdge) # si el monto de la sucursal supera los límites la agrego a la lista de aristas pendientes para volver a agregar al heap
+        if len(remainEdges) > 0:    # si la lista de aristas que superaron los límites no está vacía
             for l in remainEdges:
-                heap.insert(l)
+                if heapIsEmpty == False:    # si el heap todavía contiene sucursales
+                    heap.insert(l)  # inserto las sucursales que pasaron los límites de neuvo en el heap
+                else:   # si el heap no contiene más sucursales que cumplan los límites de monto de dinero a transportar
+                    results[k].append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
+                    break   # salgo del for k porque no hay más aristas a visitar que cumplan con los límites de dinero a transportar
 
 print(results[1])
-
-# for i in range(1, dimension + 1):
-#     print("The Min val is " + str(heap.remove().weight))
