@@ -21,7 +21,7 @@ class Node:
 
     def addEdge(self, node):
         self.edges[node.name] = node
-        self.edges[node.name].weight = calculate_distances(self.coordinates[0], node.coordinates[0], self.coordinates[1], node.coordinates[1])
+        self.edges[node.name].weight = calculate_distances(self.coordinates[0], self.coordinates[1], node.coordinates[0], node.coordinates[1])
 
 # clase min heap: cola de prioridad por menor valor de peso de nodo de sucursal
 class MinHeap:
@@ -122,8 +122,6 @@ for a in range(1, dimension + 1):
 # agrego para cada sucursal como aristas el resto de las sucursales
 for b in officeNodes:
     for c in officeNodes:
-        if b == c:  # verifica que no sea la misma sucursal para no agregarsela como arista
-            continue
         edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
         officeNodes[b].addEdge(edge)
 
@@ -132,32 +130,33 @@ for e in officeNodes:   # para cada sucursal
     hasValidPath = True
     heap = MinHeap(dimension)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
     for f in officeNodes[e].edges:   # para cada arista de la sucursal actual
-        if f != officeNodes[e].name:
-            heap.insert(officeNodes[e].edges[f]) # inserto la arista en el heap
+        heap.insert(officeNodes[e].edges[f]) # inserto la arista en el heap
     currentAmount = 0   # indica la cantidad de dinero transportándose
     heapIsEmpty = False
+    breakForG = False
     for g in officeNodes[e].edges: # para cada arista de la sucursal actual
-        edgeCanBeVisited = False # indica si se puede visitar la sucursal (si esta no supera los límites de transporte de dinero)
-        remainEdges = []    # lista con las sucursales que superan los límites de dinero para luego volver a insertarlos en el heap
-        while edgeCanBeVisited == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
-            currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
-            difference = currentAmount + currentEdge.amount
-            if currentEdge == False:    # si el heap está vacío (porque devolvió False), salgo del bucle
-                edgeCanBeVisited = True
-                heapIsEmpty = True
-            elif difference >= 0 and difference <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
-                currentAmount += currentEdge.amount # sumo el monto de la sucursal visitada
-                resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
-                edgeCanBeVisited = True    # salgo del bucle
-            else:
-                remainEdges.append(currentEdge) # si el monto de la sucursal supera los límites la agrego a la lista de aristas pendientes para volver a agregar al heap
-        if len(remainEdges) > 0:    # si la lista de aristas que superaron los límites no está vacía
-            for h in remainEdges:
+        if breakForG == False:
+            edgeCanBeVisited = False # indica si se puede visitar la sucursal (si esta no supera los límites de transporte de dinero)
+            remainEdges = []    # lista con las sucursales que superan los límites de dinero para luego volver a insertarlos en el heap
+            while edgeCanBeVisited == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
+                currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
+                difference = currentAmount + currentEdge.amount
+                if currentEdge == False:    # si el heap está vacío (porque devolvió False), salgo del bucle
+                    edgeCanBeVisited = True
+                    heapIsEmpty = True
+                elif difference >= 0 and difference <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
+                    currentAmount += currentEdge.amount # sumo el monto de la sucursal visitada
+                    resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
+                    edgeCanBeVisited = True    # salgo del bucle
+                else:
+                    remainEdges.append(currentEdge) # si el monto de la sucursal supera los límites la agrego a la lista de aristas pendientes para volver a agregar al heap
+            if len(remainEdges) > 0:    # si la lista de aristas que superaron los límites no está vacía
                 if heapIsEmpty == False:    # si el heap todavía contiene sucursales
-                    heap.insert(h)  # inserto las sucursales que pasaron los límites de neuvo en el heap
+                    for h in remainEdges:
+                        heap.insert(h)  # inserto las sucursales que pasaron los límites de neuvo en el heap
                 else:   # si el heap no contiene más sucursales que cumplan los límites de monto de dinero a transportar
                     hasValidPath = False
-                    break   # salgo del for k porque no hay más aristas a visitar que cumplan con los límites de dinero a transportar
+                    breakForG = True   # salgo del for g porque no hay más aristas a visitar que cumplan con los límites de dinero a transportar
     if hasValidPath == True:
         results[e] = resultAux
 
