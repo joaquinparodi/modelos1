@@ -181,7 +181,7 @@ for i in results:
 
 # dejo el resultado en formato de entrega
 resultString = ""
-for k in results[3]:
+for k in results[minDistanceIndex]:
     resultString += str(k) + " "
 
 # limpio el archivo entrega_1.txt
