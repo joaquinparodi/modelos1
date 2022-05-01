@@ -168,8 +168,13 @@ minDistance = 1000000
 minDistanceIndex = 1
 for i in results:
     currentDistance = 0
-    for j in officeNodes[i].edges:
-        currentDistance += officeNodes[i].edges[j].weight
+    for j in results[i]:
+        if j < len(results[i]) - 1:
+            nodeIndex = results[i][j]
+            nextNodeIndex = nodeIndex = results[i][j + 1]
+            currentCoordinates = officeNodes[nodeIndex].coordinates
+            currentCoordinatesNext = officeNodes[nextNodeIndex].coordinates
+            currentDistance += calculate_distances(currentCoordinates[0], currentCoordinates[1], currentCoordinatesNext[0], currentCoordinatesNext[1])
     if currentDistance < minDistance:
         minDistance = currentDistance
         minDistanceIndex = i
