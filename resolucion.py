@@ -133,45 +133,44 @@ for b in officeNodes:
             edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
             officeNodes[b].addEdge(edge)
 
-for e in officeNodes:   # para cada sucursal
+for e in officeNodes:   # para cada sucursal origen
     currentOffice = officeNodes[e]
-    currentAmount = currentOffice.amount   # indica la cantidad de dinero transportándos
+    currentAmount = currentOffice.amount   # indica la cantidad de dinero transportándose
     # si el monto del nodo actual supera los límites, lo descarto como origen
     if currentAmount > 30 or currentAmount < 0:
         continue
-    resultAux = []
-    resultAux.append(currentOffice.name)
+    resultAux = [] 
+    resultAux.append(currentOffice.name)    # agrego nodo origen al resultado
     lastInvalidEdge = currentOffice
     hasValidPath = True
     invalidOffices = []
-    for g in currentOffice.edges:
+    for g in currentOffice.edges:   # para cada arista del nodo origen
         if hasValidPath == False:
             heap = chargeHeap(dimension, officeNodes[currentOffice.name].edges, resultAux, invalidOffices)
             currentOffice = heap.remove()
-            if currentOffice != False:
+            if currentOffice != False:  # si el heap no está vacío
                 hasValidPath = True
             else:
                 break
-        if currentOffice != False:
-            heap = chargeHeap(dimension, officeNodes[currentOffice.name].edges, resultAux, invalidOffices)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
-            edgeCanBeVisited = False # indica si se puede visitar la sucursal (si esta no supera los límites de transporte de dinero)
-            while edgeCanBeVisited == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
-                currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
-                difference = -1
-                if currentEdge != False:
-                    difference = currentAmount + currentEdge.amount
-                else:   # si el heap no contiene más sucursales que cumplan los límites de monto de dinero a transportar
-                    hasValidPath = False
-                    invalidOffices.append(lastInvalidEdge.name)
-                    break
-                if difference >= 0 and difference <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
-                    currentAmount = difference # sumo el monto de la sucursal visitada
-                    resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) la sucursal
-                    edgeCanBeVisited = True    # salgo del bucle
-                    currentOffice = currentEdge
-                    invalidOffices = []
-                else:
-                    lastInvalidEdge = currentEdge
+        heap = chargeHeap(dimension, officeNodes[currentOffice.name].edges, resultAux, invalidOffices)
+        edgeCanBeVisited = False # indica si se puede visitar la sucursal (si esta no supera los límites de transporte de dinero)
+        while edgeCanBeVisited == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
+            currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
+            difference = -1
+            if currentEdge != False:    # si el heap no está vacío
+                difference = currentAmount + currentEdge.amount
+            else:   # si el heap no contiene más sucursales que cumplan los límites de monto de dinero a transportar
+                hasValidPath = False
+                invalidOffices.append(lastInvalidEdge.name)
+                break
+            if difference >= 0 and difference <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
+                currentAmount = difference # sumo el monto de la sucursal visitada
+                resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
+                edgeCanBeVisited = True    # salgo del bucle
+                currentOffice = currentEdge
+                invalidOffices = []
+            else:
+                lastInvalidEdge = currentEdge
     results[e] = resultAux
 
 # obtengo el índice (nombre de sucusal origen) que tenga menor distancia recorrida
@@ -196,7 +195,7 @@ for k in results[minDistanceIndex]:
     resultString += str(k) + " "
 
 # limpio el archivo entrega_1.txt
-open('entrega_1.txt', 'w').close()
+open('entrega.txt', 'w').close()
 # escribo el archivo entrega_1.txt
-with open('entrega_1.txt', 'a') as f:
+with open('entrega.txt', 'a') as f:
     f.write(resultString)
