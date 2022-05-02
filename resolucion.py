@@ -7,6 +7,13 @@ from unittest import result
 def calculate_distances(Xi, Yi, Xj, Yj):
     return math.sqrt(((Xi - Xj) ** 2) + ((Yi - Yj) ** 2))
 
+def chargeHeap(dimension, nodes, resultAux, invalidOffices):
+    heap = MinHeap(dimension - 1)
+    for i in nodes:
+        if i not in resultAux and i not in invalidOffices:
+            heap.insert(nodes[i])
+    return heap
+
 # ------------------ CLASSES ------------------
 
 # clase nodo sucursal
@@ -122,46 +129,50 @@ for a in range(1, dimension + 1):
 # agrego para cada sucursal como aristas el resto de las sucursales
 for b in officeNodes:
     for c in officeNodes:
-        edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
-        officeNodes[b].addEdge(edge)
+        if c != b:
+            edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
+            officeNodes[b].addEdge(edge)
 
 for e in officeNodes:   # para cada sucursal
+    currentOffice = officeNodes[e]
+    currentAmount = currentOffice.amount   # indica la cantidad de dinero transportándos
     # si el monto del nodo actual supera los límites, lo descarto como origen
-    if officeNodes[e].amount > 30 or officeNodes[e].amount < 0:
+    if currentAmount > 30 or currentAmount < 0:
         continue
     resultAux = []
+    resultAux.append(currentOffice.name)
+    lastInvalidEdge = currentOffice
     hasValidPath = True
-    heap = MinHeap(dimension)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
-    for f in officeNodes[e].edges:   # para cada arista de la sucursal actual
-        heap.insert(officeNodes[e].edges[f]) # inserto la arista en el heap
-    currentAmount = 0   # indica la cantidad de dinero transportándose
-    heapIsEmpty = False
-    breakForG = False
-    for g in officeNodes[e].edges: # para cada arista de la sucursal actual
-        if breakForG == False:
+    invalidOffices = []
+    for g in currentOffice.edges:
+        if hasValidPath == False:
+            heap = chargeHeap(dimension, officeNodes[currentOffice.name].edges, resultAux, invalidOffices)
+            currentOffice = heap.remove()
+            if currentOffice != False:
+                hasValidPath = True
+            else:
+                break
+        if currentOffice != False:
+            heap = chargeHeap(dimension, officeNodes[currentOffice.name].edges, resultAux, invalidOffices)   # creo la cola de prioridad y le paso como parámetro la capacidad máxima de sucursales
             edgeCanBeVisited = False # indica si se puede visitar la sucursal (si esta no supera los límites de transporte de dinero)
-            remainEdges = []    # lista con las sucursales que superan los límites de dinero para luego volver a insertarlos en el heap
             while edgeCanBeVisited == False:   # mientras se no se pueda visitar la sucursal porque pasa los límites de dinero
                 currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
-                difference = currentAmount + currentEdge.amount
-                if currentEdge == False:    # si el heap está vacío (porque devolvió False), salgo del bucle
-                    edgeCanBeVisited = True
-                    heapIsEmpty = True
-                elif difference >= 0 and difference <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
-                    currentAmount += currentEdge.amount # sumo el monto de la sucursal visitada
-                    resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
-                    edgeCanBeVisited = True    # salgo del bucle
-                else:
-                    remainEdges.append(currentEdge) # si el monto de la sucursal supera los límites la agrego a la lista de aristas pendientes para volver a agregar al heap
-            if len(remainEdges) > 0:    # si la lista de aristas que superaron los límites no está vacía
-                if heapIsEmpty == False:    # si el heap todavía contiene sucursales
-                    for h in remainEdges:
-                        heap.insert(h)  # inserto las sucursales que pasaron los límites de neuvo en el heap
+                difference = -1
+                if currentEdge != False:
+                    difference = currentAmount + currentEdge.amount
                 else:   # si el heap no contiene más sucursales que cumplan los límites de monto de dinero a transportar
                     hasValidPath = False
-                    breakForG = True   # salgo del for g porque no hay más aristas a visitar que cumplan con los límites de dinero a transportar
-    if hasValidPath == True:
-        results[e] = resultAux
+                    invalidOffices.append(lastInvalidEdge.name)
+                    break
+                if difference >= 0 and difference <= capacity:    # si el monto de la sucursal a visitar no supera los límites, la visito
+                    currentAmount = difference # sumo el monto de la sucursal visitada
+                    resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) la sucursal
+                    edgeCanBeVisited = True    # salgo del bucle
+                    currentOffice = currentEdge
+                    invalidOffices = []
+                else:
+                    lastInvalidEdge = currentEdge
+    results[e] = resultAux
 
 # obtengo el índice (nombre de sucusal origen) que tenga menor distancia recorrida
 minDistance = 1000000
