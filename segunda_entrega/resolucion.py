@@ -14,6 +14,14 @@ def chargeHeap(dimension, nodes, resultAux, invalidOffices):
             heap.insert(nodes[i])
     return heap
 
+def chargeEdges(officeNodes, officeName):
+    newEdgesDict = officeNodes
+    for c in officeNodes:
+        if c != officeName:
+            edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
+            newEdgesDict[officeName].addEdge(edge)
+    return newEdgesDict
+
 # ------------------ CLASSES ------------------
 
 # clase nodo sucursal
@@ -105,7 +113,7 @@ officeNodes = {}        # diccionario clave nombre sucursal, valor nodo sucursal
 results = {}            # diccionario clave nombre sucursal, valor lista con nombres sucursales ordendos por menor distancia a la sucursal
 
 # abro el problema y lo parseo
-file = open("problema1.txt", 'r')
+file = open("problema2.txt", 'r')
 for line in file.readlines():
     splited = line.split(" ")
     if splited[0] == "CAPACIDAD:":
@@ -126,26 +134,25 @@ for a in range(1, dimension + 1):
     office = Node(a, demands[a], coordinates[a])
     officeNodes[a] = office
 
-# agrego para cada sucursal como aristas el resto de las sucursales
-for b in officeNodes:
-    for c in officeNodes:
-        if c != b:
-            edge = Node(officeNodes[c].name, officeNodes[c].amount, officeNodes[c].coordinates)
-            officeNodes[b].addEdge(edge)
-
-print("hola")
-
+officeNodesAux = {}
 for e in officeNodes:   # para cada sucursal origen
-    currentOffice = officeNodes[e]
-    currentAmount = currentOffice.amount   # indica la cantidad de dinero transportándose
-    # si el monto del nodo actual supera los límites, lo descarto como origen
+    invalidOffices = []
+    resultAux = []
+    currentAmount = 0
+    file = open("entrega2.txt", 'r')
+    for line in file.readlines():
+        splited = line.split(" ")
+        for p in splited:
+            l = int(p)
+            resultAux.append(l)
+            currentAmount = currentAmount + officeNodes[l].amount
     if currentAmount > capacity or currentAmount < 0:
         continue
-    resultAux = []
-    resultAux.append(currentOffice.name)    # agrego nodo origen al resultado
-    invalidOffices = []
+    currentOffice = officeNodes[resultAux[len(resultAux) - 1]]
+    # si el monto del nodo actual supera los límites, lo descarto como origen
     while len(resultAux) < dimension:   # mientras no se consiga un resultado
-        heap = chargeHeap(dimension, officeNodes[currentOffice.name].edges, resultAux, invalidOffices)
+        officeNodesAux = chargeEdges(officeNodes, currentOffice.name)
+        heap = chargeHeap(dimension, officeNodesAux[currentOffice.name].edges, resultAux, invalidOffices)
         while True:   # mientras no se pueda visitar la sucursal porque pasa los límites de dinero
             currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
             difference = -1
@@ -165,8 +172,16 @@ for e in officeNodes:   # para cada sucursal origen
                 resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
                 currentOffice = currentEdge
                 invalidOffices = []
+                if len(resultAux) == 2000:
+                    resultString = ""
+                    for k in resultAux:
+                        resultString += " " + str(k)
+                    open('entrega2.txt', 'w').close()
+                    with open('entrega2.txt', 'a') as f:
+                        f.write(resultString)
+                    print("stop")
                 break
-    results[e] = resultAux
+    # results[e] = resultAux
     break
 
 # obtengo el índice (nombre de sucusal origen) que tenga menor distancia recorrida
@@ -190,8 +205,7 @@ for e in officeNodes:   # para cada sucursal origen
 # for k in results[minDistanceIndex]:
 #     resultString += str(k) + " "
 
-print(len(results[1]))
-resultString = ""
+''' resultString = ""
 for k in results[1]:
     resultString += str(k) + " "
 
@@ -199,4 +213,4 @@ for k in results[1]:
 open('entrega.txt', 'w').close()
 # escribo el archivo entrega_1.txt
 with open('entrega.txt', 'a') as f:
-    f.write(resultString)
+    f.write(resultString) '''
