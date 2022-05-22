@@ -1,0 +1,28 @@
+- impresión inicial del problema:
+    Las impresiones iniciales que tuve son que es un problema el cual puede resolverse
+    similarmente a la deteccíon del camino más corto de google maps. Este puede
+    resolverse mediante la utilización de un grafo con nodos representando a las sucursales,
+    para luego utilizar el algoritmo de Dijkstra que encuenta el camino mas corto.
+
+- ideas de como lo van a intentar resolver:
+    En principio decidí utilizar una clase nodos representando a las sucursales, los cuales
+    tienen su informacion y también tienen como información la distancia a cada sucursal.
+    Para obtener la sucursal más cercana a la sucursal en cuestión, utilicé un
+    min-heap (cola de prioridad por menor valor).
+
+- comentarios sobre los cambios que hagan en el código a medida que intentan mejorar el resultado:
+    En principio tuve muchos errores que fui arreglando mientras resolvía la idea.
+    Luego de bastante tiempo intentando resolver el problema, realicé la primer entrega,
+    la cual dió un resultado alto. Intentando mejorar el código, me dí cuenta que estaba
+    calculando mal el "sendero" ya que estaba sacando de la cola de prioridad siempre la
+    próxima sucursal más cercana al nodo origen. Esto lo resolví cambiando el algoritmo
+    a ir calculando la sucursal más cercana a la sucursal visitada en el momento.
+
+- comentarios finales:
+    Es un problema muy interesante ya que hay que encontrar una manera eficiente de
+    calcular el camino más corto con restricciones, utilizando conocimientos vistos
+    en otras materias, principalmente algoritmos y programación 2.
+    Resolviendo el problema, llegué a la conclusión de que hay tantos caminos posibles
+    que hay que utilizar algoritmos y estructuras de datos acordes al problema
+    ya que si se desea resolver sin estos, tardaría mucho tiempo la ejecución de la
+    resolucion. 
