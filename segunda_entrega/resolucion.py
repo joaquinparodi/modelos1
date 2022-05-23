@@ -135,6 +135,7 @@ for a in range(1, dimension + 1):
     officeNodes[a] = office
 
 officeNodesAux = {}
+variableForBreak = False
 for e in officeNodes:   # para cada sucursal origen
     invalidOffices = []
     resultAux = []
@@ -148,12 +149,14 @@ for e in officeNodes:   # para cada sucursal origen
             currentAmount = currentAmount + officeNodes[l].amount
     if currentAmount > capacity or currentAmount < 0:
         continue
+    initialLen = len(resultAux)
+    print(initialLen)
     currentOffice = officeNodes[resultAux[len(resultAux) - 1]]
     # si el monto del nodo actual supera los límites, lo descarto como origen
-    while len(resultAux) < dimension:   # mientras no se consiga un resultado
+    while variableForBreak == False:   # mientras no se consiga un resultado
         officeNodesAux = chargeEdges(officeNodes, currentOffice.name)
         heap = chargeHeap(dimension, officeNodesAux[currentOffice.name].edges, resultAux, invalidOffices)
-        while True:   # mientras no se pueda visitar la sucursal porque pasa los límites de dinero
+        while variableForBreak == False:   # mientras no se pueda visitar la sucursal porque pasa los límites de dinero
             currentEdge = heap.remove() # remuevo la sucursal más cercana a la actual del heap
             difference = -1
             if currentEdge != False:    # si el heap no está vacío
@@ -172,15 +175,15 @@ for e in officeNodes:   # para cada sucursal origen
                 resultAux.append(currentEdge.name) # agrego a la lista (valor del diccionario de resultados) el nombre de la sucursal
                 currentOffice = currentEdge
                 invalidOffices = []
-                if len(resultAux) == 2000:
+                if len(resultAux) == initialLen + 2:
                     resultString = ""
                     for k in resultAux:
-                        resultString += " " + str(k)
+                        resultString += str(k) + " "
                     open('entrega2.txt', 'w').close()
                     with open('entrega2.txt', 'a') as f:
-                        f.write(resultString)
+                        f.write(resultString[0: -1])
                     print("stop")
-                break
+                    variableForBreak = True
     # results[e] = resultAux
     break
 
